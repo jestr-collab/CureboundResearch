@@ -1,0 +1,375 @@
+.page {
+  width: min(1280px, calc(100% - 28px));
+  margin: 0 auto;
+  padding: 32px 0 40px;
+  color: #f5f5f5;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 22px;
+}
+
+.header h1 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.2rem, 2.8vw, 1.7rem);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  line-height: 1.3;
+  color: #ffffff;
+}
+
+.sub {
+  margin: 10px 0 0;
+  font-size: 0.88rem;
+  color: rgba(245, 245, 245, 0.55);
+}
+
+.widgets {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  align-items: stretch;
+}
+
+.widget {
+  background: #141414;
+  border: 1px solid rgba(240, 255, 90, 0.18);
+  border-radius: 16px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.widget-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 14px 16px 0;
+}
+
+.widget-head h2 {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--accent);
+}
+
+.widget-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.widget-actions span {
+  font-size: 0.72rem;
+  color: rgba(245, 245, 245, 0.45);
+  white-space: nowrap;
+}
+
+.fs-btn {
+  appearance: none;
+  border: 1px solid rgba(240, 255, 90, 0.35);
+  background: transparent;
+  color: var(--accent);
+  border-radius: 999px;
+  padding: 5px 10px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: background 120ms ease, border-color 120ms ease;
+}
+
+.fs-btn:hover {
+  background: rgba(240, 255, 90, 0.1);
+  border-color: var(--accent);
+}
+
+.widget.fullscreen {
+  position: fixed;
+  inset: 12px;
+  z-index: 40;
+  border-radius: 16px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
+}
+
+.widgets.fs-mode {
+  display: block;
+  min-height: calc(100vh - 24px);
+}
+
+.page.has-fs {
+  padding: 0;
+  width: 100%;
+}
+
+.widget.fullscreen .widget-body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  padding: 12px 18px 18px;
+}
+
+.widget.fullscreen .map,
+.widget.fullscreen .map-stack {
+  flex: 1;
+  min-height: 0;
+}
+
+.widget.fullscreen .map-stack {
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  max-height: calc(100vh - 120px);
+  aspect-ratio: 980 / 580;
+  margin: 0 auto;
+}
+
+.widget.fullscreen .map:not(.base-map) {
+  height: auto;
+  max-height: calc(100vh - 120px);
+  aspect-ratio: 980 / 580;
+  margin: 0 auto;
+}
+
+.widget.fullscreen .map-stack .base-map {
+  height: 100%;
+  width: 100%;
+}
+
+
+.widget-body {
+  padding: 10px 14px 14px;
+  flex: 1;
+}
+
+.map {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 10px;
+}
+
+.map path {
+  stroke: #0a0a0a;
+  stroke-width: 0.8;
+  transition: fill 120ms ease, opacity 120ms ease, stroke-width 120ms ease;
+}
+
+.map path.active {
+  cursor: pointer;
+}
+
+.map path.focus {
+  stroke: var(--accent);
+  stroke-width: 2.2;
+}
+
+.map-stack {
+  position: relative;
+  width: 100%;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #101010;
+  aspect-ratio: 980 / 580;
+}
+
+.map-stack .base-map {
+  display: block;
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  inset: 0;
+}
+
+.map-stack .state-outline {
+  fill: #1c1c1c;
+  stroke: #2a2a2a;
+  stroke-width: 0.7;
+  pointer-events: none;
+}
+
+.point-layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  cursor: crosshair;
+}
+
+
+.map-loading {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: rgba(245, 245, 245, 0.5);
+  font-size: 0.85rem;
+  pointer-events: none;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-top: 12px;
+  color: rgba(245, 245, 245, 0.55);
+  font-size: 0.74rem;
+}
+
+.legend .item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.legend .item.muted {
+  margin-left: auto;
+}
+
+.legend i {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  display: inline-block;
+}
+
+.tooltip {
+  position: fixed;
+  z-index: 30;
+  width: min(300px, calc(100vw - 20px));
+  max-height: 70vh;
+  overflow: auto;
+  padding: 12px 13px;
+  border-radius: 12px;
+  background: #111111;
+  color: #f5f5f5;
+  border: 1px solid rgba(240, 255, 90, 0.35);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
+  pointer-events: none;
+}
+
+.tip-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  align-items: baseline;
+  margin-bottom: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(240, 255, 90, 0.2);
+}
+
+.tip-head strong {
+  font-size: 0.9rem;
+  color: var(--accent);
+  line-height: 1.3;
+}
+
+.tip-head span {
+  font-size: 0.72rem;
+  color: rgba(245, 245, 245, 0.55);
+  white-space: nowrap;
+}
+
+.tooltip ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.tooltip li + li {
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.pi {
+  font-size: 0.86rem;
+  font-weight: 700;
+}
+
+.pi em {
+  font-style: normal;
+  margin-left: 4px;
+  color: var(--accent);
+}
+
+.area {
+  margin-top: 2px;
+  font-size: 0.78rem;
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.inst {
+  margin-top: 2px;
+  font-size: 0.72rem;
+  color: rgba(245, 245, 245, 0.55);
+}
+
+.people {
+  margin-top: 6px;
+  display: grid;
+  gap: 3px;
+}
+
+.people span {
+  font-size: 0.74rem;
+  color: rgba(245, 245, 245, 0.85);
+}
+
+.people small {
+  color: rgba(245, 245, 245, 0.45);
+  font-size: 0.68rem;
+}
+
+.tip-grid {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 5px 10px;
+  font-size: 0.78rem;
+}
+
+.tip-grid span {
+  color: rgba(245, 245, 245, 0.45);
+}
+
+.tip-grid b {
+  font-weight: 600;
+  color: #f5f5f5;
+}
+
+.footnote {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  .widgets {
+    grid-template-columns: 1fr;
+  }
+
+  .legend .item.muted {
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 640px) {
+  .page {
+    width: min(100% - 16px, 1280px);
+    padding-top: 20px;
+  }
+
+  .widget-body {
+    padding: 8px 10px 12px;
+  }
+}

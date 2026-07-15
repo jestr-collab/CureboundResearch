@@ -1,0 +1,36 @@
+:root {
+  --ink: #0a0a0a;
+  --accent: #f0ff5a;
+  --accent-deep: #c8d63a;
+  --map-empty: #2a2a2a;
+  --map-low: #5a6330;
+  --map-mid: #a8b842;
+  --map-high: #f0ff5a;
+  --font-display: "Plus Jakarta Sans", system-ui, sans-serif;
+  --font-body: "Plus Jakarta Sans", system-ui, sans-serif;
+
+  font-family: var(--font-body);
+  color: #f5f5f5;
+  background: var(--ink);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  min-width: 320px;
+  background: #0a0a0a;
+}
