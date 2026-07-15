@@ -76,9 +76,6 @@ export function ResearchMap() {
           <i style={{ background: "var(--map-low)" }} /> 1
         </span>
         <span className="item">
-          <i style={{ background: "var(--map-mid)" }} /> 2
-        </span>
-        <span className="item">
           <i style={{ background: "var(--map-high)" }} /> {maxPrograms}
         </span>
         <span className="item muted">{PROGRAMS.length} programs</span>
