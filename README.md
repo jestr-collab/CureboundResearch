@@ -2,6 +2,8 @@
 
 Interactive maps for Curebound research partnerships and donor accounts by ZIP.
 
+**Live site:** https://jestr-collab.github.io/CureboundResearch/
+
 ## Run locally
 
 ```bash
@@ -17,6 +19,10 @@ Open the URL Vite prints (usually http://127.0.0.1:5173).
 npm run build
 npm run preview
 ```
+
+## GitHub Pages
+
+Pushes to `main` build and deploy via Actions. In the repo settings, set **Pages → Source** to **GitHub Actions** (not “Deploy from a branch”).
 
 ## Notes
 

@@ -52,7 +52,7 @@ export function DonorZipMap() {
 
   useEffect(() => {
     let cancelled = false;
-    fetch("/donor-accounts.json")
+    fetch(`${import.meta.env.BASE_URL}donor-accounts.json`)
       .then((r) => r.json())
       .then((data: DonorPayload) => {
         if (cancelled) return;

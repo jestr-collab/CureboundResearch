@@ -1,7 +1,8 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
 
-// https://vite.dev/config/
-export default defineConfig({
+// Project site: https://jestr-collab.github.io/CureboundResearch/
+export default defineConfig(({ command }) => ({
+  base: command === "build" ? "/CureboundResearch/" : "/",
   plugins: [react()],
-})
+}));
