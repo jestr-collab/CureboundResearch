@@ -24,6 +24,24 @@ npm run preview
 
 Pushes to `main` build and deploy via Actions. In the repo settings, set **Pages → Source** to **GitHub Actions** (not “Deploy from a branch”).
 
+## PNG exports
+
+Meeting-ready PNGs live in `exports/`:
+
+- `curebound-research-map.png` — map plus full partnership details on the left
+- `donor-accounts-by-zip.png` — donor ZIP point map
+
+Regenerate anytime:
+
+```bash
+npm run export:png
+```
+
+Preview export layouts in the browser:
+
+- `export-research.html`
+- `export-donor.html`
+
 ## Notes
 
 - Left widget: research programs by state
