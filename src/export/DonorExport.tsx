@@ -18,6 +18,7 @@ function fitTransform(w: number, h: number) {
 export function DonorExport() {
   const wrapRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const whiteMap = new URLSearchParams(window.location.search).has("white");
   const [points, setPoints] = useState<DonorPoint[]>([]);
   const [ready, setReady] = useState(false);
 
@@ -85,7 +86,7 @@ export function DonorExport() {
       <h1 className="export-title">Donor accounts by ZIP</h1>
       <div className="export-body" style={{ flex: 1 }}>
         <div className="export-map-col" style={{ width: "100%" }}>
-          <div className="export-map-wrap">
+          <div className={`export-map-wrap${whiteMap ? " white-us-map" : ""}`}>
             <div className="export-map-stack" ref={wrapRef}>
               <svg
                 className="map base-map"

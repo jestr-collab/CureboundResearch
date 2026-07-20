@@ -37,6 +37,17 @@
   padding-right: 8px;
 }
 
+.export-panel-scroll {
+  overflow-y: auto;
+  max-height: 100%;
+}
+
+.export-count {
+  margin: 0 0 4px;
+  font-size: 0.72rem;
+  color: rgba(245, 245, 245, 0.55);
+}
+
 .export-panel h3 {
   margin: 0 0 4px;
   font-size: 0.82rem;
@@ -111,12 +122,35 @@
 .export-map-wrap {
   flex: 1;
   min-height: 0;
-  background: #141414;
+  background: #0a0a0a;
   border: 1px solid rgba(240, 255, 90, 0.18);
   border-radius: 12px;
   padding: 14px;
   display: flex;
   flex-direction: column;
+}
+
+.research-world-export {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1000 / 500;
+  background: #0a0a0a;
+}
+
+.research-world-export .world-base-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+  pointer-events: none;
+}
+
+.research-world-export .map {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
 }
 
 .export-map-wrap .map,
@@ -137,7 +171,13 @@
 
 .export-map-wrap .state-outline {
   fill: #1c1c1c;
-  stroke: #2a2a2a;
+  stroke: #d9d9d9;
+  stroke-width: 0.8;
+}
+
+.export-map-wrap.white-us-map .state-outline {
+  fill: #a8aca6;
+  stroke: #a7a7a7;
   stroke-width: 0.7;
 }
 

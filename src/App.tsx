@@ -81,11 +81,11 @@ export default function App() {
         <Widget
           id="research"
           title="Curebound Research"
-          subtitle="Programs by state"
+          subtitle="Institutions worldwide"
           fullscreen={fullscreen}
           onToggleFullscreen={toggleFullscreen}
         >
-          <ResearchMap />
+          <ResearchMap isFullscreen={fullscreen === "research"} />
         </Widget>
 
         <Widget

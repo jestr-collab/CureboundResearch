@@ -82,6 +82,11 @@ async function main() {
       resolve(outDir, "donor-accounts-by-zip.png"),
       "#export-root",
     );
+    await screenshot(
+      `${base}/export-donor.html?white=1`,
+      resolve(outDir, "donor-accounts-by-zip-white-us.png"),
+      "#export-root",
+    );
   } finally {
     preview.kill("SIGTERM");
   }

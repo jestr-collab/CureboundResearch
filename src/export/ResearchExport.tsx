@@ -1,87 +1,89 @@
-import { aggregateByState } from "../data/programs";
-import { STATE_NAMES } from "../data/stateNames";
-import { STATE_PATHS } from "../data/statePaths";
-import { fillForCount } from "../lib/mapColors";
+import { useMemo } from "react";
+import {
+  RESEARCH_INSTITUTIONS,
+  RESEARCH_TOTAL,
+} from "../data/researchInstitutions";
+import { WORLD_VB_H, WORLD_VB_W } from "../data/worldPath";
+import worldBase from "../assets/world-base.png";
 import "./export.css";
 
-const VB_W = 980;
-const VB_H = 580;
-
 export function ResearchExport() {
-  const byState = aggregateByState(STATE_NAMES);
-  const activeStates = Object.keys(byState).sort();
-  const maxPrograms = Math.max(
-    ...Object.values(byState).map((s) => s.programCount),
-  );
+  const byRegion = useMemo(() => {
+    const map = new Map<string, typeof RESEARCH_INSTITUTIONS>();
+    for (const inst of RESEARCH_INSTITUTIONS) {
+      const key = inst.r;
+      const list = map.get(key);
+      if (list) list.push(inst);
+      else map.set(key, [inst]);
+    }
+    return [...map.entries()].sort((a, b) => a[0].localeCompare(b[0]));
+  }, []);
 
   return (
     <div className="export-page" id="export-root" data-export-ready="true">
-      <h1 className="export-title">Curebound Research</h1>
+      <h1 className="export-title">
+        Curebound Research · {RESEARCH_TOTAL} institutions plotted
+      </h1>
       <div className="export-body">
-        <aside className="export-panel">
-          {activeStates.map((abbr) => {
-            const agg = byState[abbr];
-            return (
-              <section key={abbr} className="export-state">
-                <h3>
-                  {agg.name} ({agg.state}) · {agg.programCount} program
-                  {agg.programCount === 1 ? "" : "s"}
-                </h3>
-                {agg.programs.map((p) => (
-                  <article key={p.id} className="export-program">
-                    <div className="pi">
-                      {p.pi}
-                      {p.priority ? <em>★</em> : null}
-                    </div>
-                    <div className="area">{p.cancerArea}</div>
-                    <div className="inst">
-                      {p.institution} · {p.city}, {p.state}
-                    </div>
-                    <div className="people">
-                      {p.partners.map((partner) => (
-                        <span key={partner.name}>
-                          {partner.name}{" "}
-                          <small>({partner.role})</small>
-                        </span>
-                      ))}
-                    </div>
-                  </article>
-                ))}
-              </section>
-            );
-          })}
+        <aside className="export-panel export-panel-scroll">
+          <p className="export-count">
+            Plotted {RESEARCH_TOTAL} / {RESEARCH_TOTAL} from
+            updatedresearchinstitution.csv
+          </p>
+          {byRegion.map(([region, items]) => (
+            <section key={region} className="export-state">
+              <h3>
+                {region} · {items.length}
+              </h3>
+              {items.map((inst) => (
+                <article key={inst.id} className="export-program">
+                  <div className="pi">{inst.n}</div>
+                  <div className="inst">
+                    {inst.c}, {inst.r}
+                  </div>
+                </article>
+              ))}
+            </section>
+          ))}
         </aside>
 
         <div className="export-map-col">
           <div className="export-map-wrap">
-            <svg
-              className="map"
-              viewBox={`0 0 ${VB_W} ${VB_H}`}
-              preserveAspectRatio="xMidYMid meet"
-              role="img"
-              aria-label="US map of research partnerships by state"
-            >
-              {Object.entries(STATE_PATHS).map(([abbr, d]) => {
-                const count = byState[abbr]?.programCount ?? 0;
-                return (
-                  <path
-                    key={abbr}
-                    d={d}
-                    fill={fillForCount(count, maxPrograms)}
+            <div className="export-map-stack research-world-export">
+              <img
+                className="world-base-img"
+                src={worldBase}
+                alt=""
+                draggable={false}
+              />
+              <svg
+                className="map"
+                viewBox={`0 0 ${WORLD_VB_W} ${WORLD_VB_H}`}
+                preserveAspectRatio="none"
+                role="img"
+                aria-label="Global map of Curebound research institutions"
+              >
+                {RESEARCH_INSTITUTIONS.map((inst) => (
+                  <circle
+                    key={inst.id}
+                    cx={inst.x}
+                    cy={inst.y}
+                    r="3.2"
+                    fill="#f0ff5a"
+                    fillOpacity="0.9"
+                    stroke="#0a0a0a"
+                    strokeWidth="0.5"
                   />
-                );
-              })}
-            </svg>
+                ))}
+              </svg>
+            </div>
             <div className="export-legend">
-              <span>Programs</span>
               <span className="item">
-                <i style={{ background: "var(--map-empty)" }} /> None
+                <i className="dot" style={{ background: "#f0ff5a" }} /> One
+                point per institution
               </span>
-              <span className="item">
-                <i style={{ background: "var(--map-low)" }} /> 1
-              </span>
-              <span className="item">
-                <i style={{ background: "var(--map-high)" }} /> {maxPrograms}
+              <span>
+                Plotted {RESEARCH_TOTAL} / {RESEARCH_TOTAL}
               </span>
             </div>
           </div>

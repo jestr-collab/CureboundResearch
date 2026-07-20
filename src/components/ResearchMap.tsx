@@ -1,113 +1,225 @@
-import { useState, type MouseEvent } from "react";
-import { PROGRAMS, aggregateByState } from "../data/programs";
-import { STATE_NAMES } from "../data/stateNames";
-import { STATE_PATHS } from "../data/statePaths";
+import { useEffect, useMemo, useState, type CSSProperties, type MouseEvent } from "react";
+import {
+  RESEARCH_INSTITUTIONS,
+  RESEARCH_TOTAL,
+  type ResearchInstitution,
+} from "../data/researchInstitutions";
+import { WORLD_VB_H, WORLD_VB_W } from "../data/worldPath";
+import worldBase from "../assets/world-base.png";
 
-function fillForCount(count: number, max: number): string {
-  if (count <= 0) return "var(--map-empty)";
-  const t = count / max;
-  if (t >= 0.75) return "var(--map-high)";
-  if (t >= 0.4) return "var(--map-mid)";
-  return "var(--map-low)";
+type Tip = {
+  items: ResearchInstitution[];
+  x: number;
+  y: number;
+};
+
+const POP_DURATION_MS = 500;
+const POP_SPAN_MS = 2600;
+
+/** LA/OC/SD metro — skip lines within this cluster */
+const SOCAL_CITIES = new Set([
+  "San Diego",
+  "Los Angeles",
+  "Orange",
+  "Pasadena",
+  "Duarte",
+  "Santa Ana",
+  "El Segundo",
+  "Fountain Valley",
+]);
+
+function isSouthernCalifornia(inst: ResearchInstitution): boolean {
+  return inst.r === "California" && SOCAL_CITIES.has(inst.c);
 }
 
-export function ResearchMap() {
-  const byState = aggregateByState(STATE_NAMES);
-  const maxPrograms = Math.max(
-    ...Object.values(byState).map((s) => s.programCount),
-  );
+function popDelay(inst: ResearchInstitution): number {
+  const t = inst.x / WORLD_VB_W + (inst.y / WORLD_VB_H) * 0.12;
+  return Math.round(t * POP_SPAN_MS);
+}
 
-  const [hovered, setHovered] = useState<string | null>(null);
-  const [tip, setTip] = useState<{ x: number; y: number } | null>(null);
-  const agg = hovered ? byState[hovered] : null;
+export function ResearchMap({ isFullscreen = false }: { isFullscreen?: boolean }) {
+  const [hoverId, setHoverId] = useState<number | null>(null);
+  const [tip, setTip] = useState<Tip | null>(null);
+  const [animating, setAnimating] = useState(false);
 
-  function moveTip(abbr: string, e: MouseEvent) {
-    if (!byState[abbr]) {
-      setHovered(null);
-      setTip(null);
+  const byLocation = useMemo(() => {
+    const map = new Map<string, ResearchInstitution[]>();
+    for (const inst of RESEARCH_INSTITUTIONS) {
+      const key = `${inst.c}|${inst.r}`;
+      const list = map.get(key);
+      if (list) list.push(inst);
+      else map.set(key, [inst]);
+    }
+    return map;
+  }, []);
+
+  const popDelays = useMemo(() => {
+    const map = new Map<number, number>();
+    for (const inst of RESEARCH_INSTITUTIONS) {
+      map.set(inst.id, popDelay(inst));
+    }
+    return map;
+  }, []);
+
+  const sanDiegoHub = useMemo(() => {
+    const sd = RESEARCH_INSTITUTIONS.filter((i) => i.c === "San Diego");
+    if (sd.length === 0) return { x: 176.15, y: 159.12 };
+    return {
+      x: sd.reduce((s, i) => s + i.x, 0) / sd.length,
+      y: sd.reduce((s, i) => s + i.y, 0) / sd.length,
+    };
+  }, []);
+
+  const researchLinks = useMemo(() => {
+    const seen = new Set<string>();
+    const links: {
+      key: string;
+      x: number;
+      y: number;
+      delay: number;
+      len: number;
+    }[] = [];
+    for (const inst of RESEARCH_INSTITUTIONS) {
+      if (isSouthernCalifornia(inst)) continue;
+      const key = `${inst.c}|${inst.r}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      links.push({
+        key,
+        x: inst.x,
+        y: inst.y,
+        delay: popDelay(inst),
+        len: Math.hypot(inst.x - sanDiegoHub.x, inst.y - sanDiegoHub.y),
+      });
+    }
+    return links;
+  }, [sanDiegoHub]);
+
+  useEffect(() => {
+    if (!isFullscreen) {
+      setAnimating(false);
       return;
     }
-    setHovered(abbr);
-    const w = 300;
+    setAnimating(true);
+    const done = window.setTimeout(
+      () => setAnimating(false),
+      POP_SPAN_MS + POP_DURATION_MS + 80,
+    );
+    return () => window.clearTimeout(done);
+  }, [isFullscreen]);
+
+  function showTip(inst: ResearchInstitution, e: MouseEvent) {
+    const key = `${inst.c}|${inst.r}`;
+    const items = byLocation.get(key) ?? [inst];
+    setHoverId(inst.id);
+    const w = 320;
     const x =
-      e.clientX + 18 + w > window.innerWidth ? e.clientX - w - 12 : e.clientX + 18;
-    const y = Math.min(e.clientY + 14, window.innerHeight - 120);
-    setTip({ x: Math.max(8, x), y: Math.max(8, y) });
+      e.clientX + 16 + w > window.innerWidth
+        ? e.clientX - w - 12
+        : e.clientX + 16;
+    const y = Math.min(e.clientY + 12, window.innerHeight - 120);
+    setTip({ items, x: Math.max(8, x), y: Math.max(8, y) });
   }
 
   return (
     <>
-      <svg
-        className="map"
-        viewBox="0 0 980 580"
-        role="img"
-        aria-label="US map of research partnerships by state"
-      >
-        {Object.entries(STATE_PATHS).map(([abbr, d]) => {
-          const count = byState[abbr]?.programCount ?? 0;
-          const active = count > 0;
-          const focus = hovered === abbr;
-          return (
-            <path
-              key={abbr}
-              d={d}
-              fill={fillForCount(count, maxPrograms)}
-              className={[active ? "active" : "", focus ? "focus" : ""]
-                .filter(Boolean)
-                .join(" ")}
-              opacity={hovered && active && !focus ? 0.45 : 1}
-              onMouseEnter={(e) => moveTip(abbr, e)}
-              onMouseMove={(e) => moveTip(abbr, e)}
-              onMouseLeave={() => {
-                setHovered(null);
-                setTip(null);
-              }}
-            />
-          );
-        })}
-      </svg>
-
-      <div className="legend">
-        <span>Programs</span>
-        <span className="item">
-          <i style={{ background: "var(--map-empty)" }} /> None
-        </span>
-        <span className="item">
-          <i style={{ background: "var(--map-low)" }} /> 1
-        </span>
-        <span className="item">
-          <i style={{ background: "var(--map-high)" }} /> {maxPrograms}
-        </span>
-        <span className="item muted">{PROGRAMS.length} programs</span>
+      <div className="map-stack research-world">
+        <img
+          className="world-base-img"
+          src={worldBase}
+          alt=""
+          draggable={false}
+        />
+        <svg
+          className={`map world-map${animating ? " research-dots-animating" : ""}`}
+          viewBox={`0 0 ${WORLD_VB_W} ${WORLD_VB_H}`}
+          preserveAspectRatio="none"
+          role="img"
+          aria-label="Global map of Curebound research institutions"
+        >
+          {isFullscreen ? (
+            <g className="research-links" aria-hidden>
+              {researchLinks.map((link) => (
+                <line
+                  key={link.key}
+                  x1={sanDiegoHub.x}
+                  y1={sanDiegoHub.y}
+                  x2={link.x}
+                  y2={link.y}
+                  className="research-link"
+                  style={
+                    animating
+                      ? ({
+                          "--line-len": link.len,
+                          animationDelay: `${link.delay}ms`,
+                        } as CSSProperties)
+                      : undefined
+                  }
+                />
+              ))}
+            </g>
+          ) : null}
+          {RESEARCH_INSTITUTIONS.map((inst) => {
+            const active = hoverId === inst.id;
+            return (
+              <circle
+                key={inst.id}
+                cx={inst.x}
+                cy={inst.y}
+                r={active ? 5.5 : 3.8}
+                className={`research-dot${active ? " active" : ""}`}
+                style={
+                  animating
+                    ? { animationDelay: `${popDelays.get(inst.id) ?? 0}ms` }
+                    : undefined
+                }
+                onMouseEnter={(e) => showTip(inst, e)}
+                onMouseMove={(e) => showTip(inst, e)}
+                onMouseLeave={() => {
+                  setHoverId(null);
+                  setTip(null);
+                }}
+              >
+                <title>
+                  {inst.n} — {inst.c}, {inst.r}
+                </title>
+              </circle>
+            );
+          })}
+        </svg>
       </div>
 
-      {agg && tip ? (
-        <aside className="tooltip" style={{ left: tip.x, top: tip.y }} aria-hidden>
+      <div className="legend">
+        <span className="item">
+          <i className="dot" style={{ background: "var(--accent)" }} /> One
+          point per institution
+        </span>
+        <span className="item muted">
+          Plotted {RESEARCH_TOTAL} / {RESEARCH_TOTAL}
+        </span>
+      </div>
+
+      {tip ? (
+        <aside
+          className="tooltip"
+          style={{ left: tip.x, top: tip.y }}
+          aria-hidden
+        >
           <div className="tip-head">
             <strong>
-              {agg.name} ({agg.state})
+              {tip.items[0].c}, {tip.items[0].r}
             </strong>
             <span>
-              {agg.programCount} program{agg.programCount === 1 ? "" : "s"}
+              {tip.items.length} institution
+              {tip.items.length === 1 ? "" : "s"}
             </span>
           </div>
           <ul>
-            {agg.programs.map((p) => (
-              <li key={p.id}>
-                <div className="pi">
-                  {p.pi}
-                  {p.priority ? <em>★</em> : null}
-                </div>
-                <div className="area">{p.cancerArea}</div>
+            {tip.items.map((inst) => (
+              <li key={inst.id}>
+                <div className="pi">{inst.n}</div>
                 <div className="inst">
-                  {p.institution} · {p.city}, {p.state}
-                </div>
-                <div className="people">
-                  {p.partners.map((partner) => (
-                    <span key={partner.name}>
-                      {partner.name} <small>({partner.role})</small>
-                    </span>
-                  ))}
+                  {inst.c}, {inst.r}
                 </div>
               </li>
             ))}
